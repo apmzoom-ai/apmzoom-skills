@@ -1,0 +1,21 @@
+name = "apmzoom-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[vars]
+APM_API_BASE = "https://44k2t5n59e.execute-api.ap-northeast-2.amazonaws.com"
+# APM_ACCOUNT, APM_PASSWORD, APM_TOKEN are secrets - set via:
+#   wrangler secret put APM_ACCOUNT
+#   wrangler secret put APM_PASSWORD
+#   wrangler secret put APM_TOKEN
+
+# KV namespace for token caching
+# Create with: wrangler kv namespace create TOKEN_CACHE
+# Then update the id below
+# [[kv_namespaces]]
+# binding = "TOKEN_CACHE"
+# id = "<your-kv-namespace-id>"
+
+# Production route
+# [env.production]
+# routes = [{ pattern = "api.apmzoom.ai/*", zone_name = "apmzoom.ai" }]

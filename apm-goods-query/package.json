@@ -1,0 +1,14 @@
+{
+  "name": "@apm-ai/skill-goods-query",
+  "version": "0.1.0",
+  "description": "APM Zoom goods search and AI analysis skill for Claude Code",
+  "keywords": ["claude-code-skill", "apm", "goods", "e-commerce", "ai-analysis"],
+  "author": "APM AI Team",
+  "license": "MIT",
+  "files": ["SKILL.md", "skill.json", "src/"],
+  "scripts": {
+    "stats": "python3 src/apm-goods-query.py stats",
+    "search": "python3 src/apm-goods-query.py search",
+    "sync": "python3 src/apm-goods-query.py sync"
+  }
+}

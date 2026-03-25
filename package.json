@@ -1,0 +1,21 @@
+{
+  "name": "@apm-ai/apmzoom-skills",
+  "version": "0.1.0",
+  "description": "Claude Code Skills for APM Zoom e-commerce platform",
+  "keywords": [
+    "claude-code",
+    "skills",
+    "apm",
+    "e-commerce",
+    "ai-agent"
+  ],
+  "author": "APM AI Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apmzoom-ai/apmzoom-skills.git"
+  },
+  "workspaces": [
+    "apm-*"
+  ]
+}
