@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# Pre-commit hook: block commits containing sensitive data.
+# Patterns defined in .gitguard (one fixed string per line).
+#
+
+GUARD_FILE="$(git rev-parse --show-toplevel)/.gitguard"
+
+if [ ! -f "$GUARD_FILE" ]; then
+    exit 0
+fi
+
+# Get only added lines from staged diff, excluding .gitguard itself
+DIFF=$(git diff --cached --diff-filter=ACMR -U0 -- . ':!.gitguard' | grep -E '^[+]' | grep -v '^[+][+][+]')
+
+if [ -z "$DIFF" ]; then
+    exit 0
+fi
+
+FOUND=0
+
+while IFS= read -r pattern; do
+    case "$pattern" in
+        '#'*|'') continue ;;
+    esac
+
+    MATCH=$(echo "$DIFF" | grep -F "$pattern")
+
+    if [ -n "$MATCH" ]; then
+        if [ "$FOUND" -eq 0 ]; then
+            echo ""
+            echo "BLOCKED: Sensitive data detected in staged changes!"
+            echo "=========================================="
+            FOUND=1
+        fi
+        echo ""
+        echo "  Pattern: $pattern"
+        echo "$MATCH" | head -3 | sed 's/^/    /'
+    fi
+done < "$GUARD_FILE"
+
+if [ "$FOUND" -ne 0 ]; then
+    echo ""
+    echo "Remove sensitive data before committing."
+    echo "Use environment variables instead of hardcoded credentials."
+    echo ""
+    exit 1
+fi
+
+exit 0
