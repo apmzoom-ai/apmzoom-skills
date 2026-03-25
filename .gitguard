@@ -1,0 +1,16 @@
+# Sensitive data patterns to block from commits
+# One regex per line (POSIX ERE). Lines starting with # are comments.
+
+# Known accounts & passwords
+h2009120@gmail.com
+159357qaz
+pengsong001
+
+# JWT tokens
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+
+# Private keys
+BEGIN PRIVATE KEY
+BEGIN RSA PRIVATE KEY
+BEGIN EC PRIVATE KEY
+BEGIN OPENSSH PRIVATE KEY
