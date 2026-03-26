@@ -1,46 +1,52 @@
 ---
 name: apm-goods
-description: Search and analyze goods from APM Zoom platform with AI (local LLM + vision model)
+description: Search and query goods from APM Zoom platform via API
 command: apm-goods
 ---
 
-# APM Zoom Goods Query (v2)
+# APM Zoom Goods Query (v3 — Pure API)
 
-AI-powered goods search and analysis for the APM Zoom e-commerce platform. Uses local SQLite database (27K+ goods), Qwen3-30B for text analysis, and minicpm-v for image recognition.
+Query goods from the APM Zoom e-commerce platform. All data fetched from remote API, no local database or LLM required.
 
-## Commands
+## CLI Commands
 
 ```bash
-# Quick stats
-python3 skills/apm-goods-query/src/apm-goods-query.py stats
-
-# AI natural language search (uses local LLM to parse intent + SQLite query)
+# Search goods by keyword
 python3 skills/apm-goods-query/src/apm-goods-query.py search "蓝色T恤"
-python3 skills/apm-goods-query/src/apm-goods-query.py search "便宜的夹克 3万以下"
-python3 skills/apm-goods-query/src/apm-goods-query.py search "高评分连衣裙"
+python3 skills/apm-goods-query/src/apm-goods-query.py search "夹克" --page 2 --limit 10
 
-# List with filters
-python3 skills/apm-goods-query/src/apm-goods-query.py list --category T恤 --color 蓝 --format table
-python3 skills/apm-goods-query/src/apm-goods-query.py list --min-price 20000 --max-price 50000 --limit 30
-python3 skills/apm-goods-query/src/apm-goods-query.py list --store apMLuxe --mark selling
+# List goods with filters
+python3 skills/apm-goods-query/src/apm-goods-query.py list --keyword T恤 --mark selling
+python3 skills/apm-goods-query/src/apm-goods-query.py list --page 3 --limit 30 --format json
 
-# Goods detail (auto vision analysis if not done yet)
+# Goods detail
 python3 skills/apm-goods-query/src/apm-goods-query.py detail <goods_id>
 
-# Deep analysis with local LLM
-python3 skills/apm-goods-query/src/apm-goods-query.py analyze "T恤市场趋势分析"
-python3 skills/apm-goods-query/src/apm-goods-query.py analyze "哪些店铺性价比最高"
-python3 skills/apm-goods-query/src/apm-goods-query.py analyze "给我一份5000万韩币采购方案"
-
-# Data sync and reference
-python3 skills/apm-goods-query/src/apm-goods-query.py sync           # Re-sync all data from API
-python3 skills/apm-goods-query/src/apm-goods-query.py categories      # Category tree
-python3 skills/apm-goods-query/src/apm-goods-query.py origins         # Origin list
+# Category tree and origins
+python3 skills/apm-goods-query/src/apm-goods-query.py categories [--flat]
+python3 skills/apm-goods-query/src/apm-goods-query.py origins
 ```
+
+## Cloudflare Worker API
+
+Deployed at Cloudflare Workers. Endpoints:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/goods?q=keyword&page=1&limit=20` | Search/list goods |
+| GET | `/api/goods/:id` | Goods detail |
+| GET | `/api/categories` | Category tree |
+| GET | `/api/origins` | Origin list |
+| GET | `/api/health` | Health check |
+
+## Environment Variables
+
+- `APM_ACCOUNT` — Login account (set in Cloudflare Dashboard)
+- `APM_PASSWORD` — Login password (set in Cloudflare Dashboard)
+- `APM_API_BASE` — API base URL (default configured in wrangler.toml)
 
 ## Architecture
 
-- **Data**: SQLite DB at `data/goods.db` (27K+ goods with vision tags)
-- **Text LLM**: Qwen3-30B via oMLX (port 8000) for analysis and search parsing
-- **Vision LLM**: minicpm-v:8b via Ollama (port 11434) for image color/style recognition
-- **API**: AWS API Gateway for data sync
+- **Data**: All from APM Zoom remote API (AWS API Gateway)
+- **Auth**: Auto-login with token cached in Cloudflare KV (23h TTL)
+- **Deployment**: Cloudflare Workers

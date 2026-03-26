@@ -1,26 +1,25 @@
 {
   "name": "apm-goods-query",
-  "version": "0.1.0",
-  "description": "Search and analyze goods from APM Zoom platform with AI (local LLM + vision model)",
+  "version": "0.3.0",
+  "description": "Search and query goods from APM Zoom platform via remote API",
   "command": "apm-goods",
   "category": "data-query",
   "author": "APM AI Team",
   "runtime": "python",
   "entrypoint": "src/apm-goods-query.py",
+  "worker": {
+    "runtime": "cloudflare-workers",
+    "entrypoint": "../worker/src/index.ts"
+  },
   "dependencies": {
-    "services": [],
+    "services": ["apm-zoom-api"],
     "agents": [],
-    "tools": [],
-    "llm": {
-      "text": { "model": "qwen3-30b", "provider": "omlx", "optional": true },
-      "vision": { "model": "minicpm-v:8b", "provider": "ollama", "optional": true }
-    },
-    "data": ["data/goods.db"]
+    "tools": []
   },
   "permissions": ["read_only"],
   "config": {
-    "APM_OMLX_URL": { "default": "http://localhost:8000", "description": "Text LLM endpoint" },
-    "APM_OLLAMA_URL": { "default": "http://localhost:11434", "description": "Vision LLM endpoint" },
-    "APM_DB_PATH": { "default": "./data/goods.db", "description": "SQLite database path" }
+    "APM_ACCOUNT": { "required": true, "description": "APM Zoom login account" },
+    "APM_PASSWORD": { "required": true, "description": "APM Zoom login password", "secret": true },
+    "APM_API_BASE": { "default": "https://44k2t5n59e.execute-api.ap-northeast-2.amazonaws.com", "description": "APM API base URL" }
   }
 }
