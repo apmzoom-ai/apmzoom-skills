@@ -1,0 +1,13 @@
+{
+  "name": "@apm-ai/mcp-goods-query",
+  "version": "0.4.0",
+  "description": "MCP Server for APM Zoom goods query",
+  "type": "module",
+  "main": "mcp-server.js",
+  "scripts": {
+    "start": "node mcp-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}

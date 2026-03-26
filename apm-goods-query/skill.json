@@ -1,25 +1,26 @@
 {
   "name": "apm-goods-query",
-  "version": "0.3.0",
-  "description": "Search and query goods from APM Zoom platform via remote API",
-  "command": "apm-goods",
-  "category": "data-query",
+  "version": "0.4.0",
+  "description": "Search and query 27K+ goods from APM Zoom Korean fashion e-commerce platform",
+  "command": "apm-goods-query",
+  "category": "e-commerce",
   "author": "APM AI Team",
-  "runtime": "python",
-  "entrypoint": "src/apm-goods-query.py",
-  "worker": {
-    "runtime": "cloudflare-workers",
-    "entrypoint": "../worker/src/index.ts"
+  "license": "MIT",
+  "homepage": "https://github.com/apmzoom-ai/apmzoom-skills",
+  "api": {
+    "base_url": "https://skiil.apmzoom.ai",
+    "endpoints": [
+      "GET /api/goods",
+      "GET /api/goods/:id",
+      "GET /api/categories",
+      "GET /api/health"
+    ]
   },
-  "dependencies": {
-    "services": ["apm-zoom-api"],
-    "agents": [],
-    "tools": []
+  "install": {
+    "clawhub": "clawhub install apm-goods-query",
+    "claude-code": "cp -r install/claude-code ~/.claude/skills/apm-goods-query",
+    "mcp": "See install/mcp/"
   },
-  "permissions": ["read_only"],
-  "config": {
-    "APM_ACCOUNT": { "required": true, "description": "APM Zoom login account" },
-    "APM_PASSWORD": { "required": true, "description": "APM Zoom login password", "secret": true },
-    "APM_API_BASE": { "default": "https://44k2t5n59e.execute-api.ap-northeast-2.amazonaws.com", "description": "APM API base URL" }
-  }
+  "tags": ["e-commerce", "fashion", "korea", "goods-search", "api", "korean-fashion"],
+  "permissions": ["read_only"]
 }
