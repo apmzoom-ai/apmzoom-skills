@@ -110,7 +110,7 @@ async function handleGoodsDetail(id: string, env: Env): Promise<Response> {
 
 async function handleCategories(env: Env): Promise<Response> {
   const token = await getToken(env);
-  const resp = await apiRequest(env, 'GET', '/gds/app/m_goodsclasslist', 'categories', { token });
+  const resp = await apiRequest(env, 'GET', '/gds/admin/a_goodsclasslist', 'categories', { token });
 
   if (resp.code !== 100) {
     return error(resp.message || 'Failed to fetch categories', 502);
@@ -119,15 +119,10 @@ async function handleCategories(env: Env): Promise<Response> {
   return json(resp.result || []);
 }
 
-async function handleOrigins(env: Env): Promise<Response> {
-  const token = await getToken(env);
-  const resp = await apiRequest(env, 'GET', '/gds/app/m_goodsmakeaddresslist', 'origins', { token });
-
-  if (resp.code !== 100) {
-    return error(resp.message || 'Failed to fetch origins', 502);
-  }
-
-  return json(resp.result || []);
+async function handleOrigins(_env: Env): Promise<Response> {
+  // Origins endpoint requires app-level auth (p=1), not available in admin mode (p=3)
+  // Return static data for now
+  return json({ message: 'Origins endpoint not available in admin mode', data: [] });
 }
 
 // ── Router ──

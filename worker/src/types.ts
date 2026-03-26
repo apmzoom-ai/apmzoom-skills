@@ -1,8 +1,6 @@
 export interface Env {
   APM_API_BASE: string;
-  APM_ACCOUNT: string;
-  APM_PASSWORD: string;
-  APM_TOKEN?: string;  // Pre-configured token (fallback if login fails)
+  APM_REFRESH_TOKEN: string;  // Long-lived refresh token for auto-renewing access_token
   TOKEN_CACHE: KVNamespace;
 }
 

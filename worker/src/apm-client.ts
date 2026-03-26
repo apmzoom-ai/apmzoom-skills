@@ -1,38 +1,38 @@
 import type { Env, ApiResponse, TokenCache } from './types';
 
-// ── Sign Seeds (from Python SIGN_SEEDS) ──
+// ── Sign Seeds (from Swagger docs) ──
 
-type SignSeed = string | ((account: string, password: string) => string);
+type SignSeed = string | ((a: string, b: string) => string);
 
 const SIGN_SEEDS: Record<string, SignSeed> = {
-  login:        (a, p) => a + p + 'ggfgffgfggf',
-  goods_list:   'jsm6y$dh3hjsb',
-  goods_detail: 'jsk0r$dh3hjsb',
-  goods_sku:    'jsk0enu@3hjsb',
-  categories:   'jskdn$dh3hjsb',
-  origins:      'js0ntu$wphjsb',
-  admin_list:   'jskdsfgsnss$dsaah3hjsb',
-  admin_login:  (a, p) => a + p + 'sjpOkkmhm9ds',
+  // Admin endpoints
+  admin_list:     'jskdsfgsnss$dsaah3hjsb',
+  admin_class:    'jskdn$dh3hjsb',
+  // App endpoints (merchant)
+  goods_list:     'jsm6y$dh3hjsb',
+  categories:     'jskdn$dh3hjsb',
+  origins:        'js0ntu$wphjsb',
+  // User endpoints
+  u_search:       'jsm6y$nu5wjsb',
+  u_goods:        'jsk0r$om2djsb',
+  // Auth
+  captcha:        'ijhteuPPokM6241R24',
+  refresh_token:  (rt: string, _: string) => rt + 'ffdfddfdfu***',
 };
 
 // ── Pure JS MD5 (RFC 1321) ──
-// Cloudflare Workers don't support crypto.subtle.digest('MD5')
 
 function md5(input: string): string {
-  // Convert string to byte array (UTF-8)
   const str = unescape(encodeURIComponent(input));
   const bytes: number[] = [];
   for (let i = 0; i < str.length; i++) bytes.push(str.charCodeAt(i));
 
-  // Pre-processing
   const bitLen = bytes.length * 8;
   bytes.push(0x80);
   while (bytes.length % 64 !== 56) bytes.push(0);
-  // Append length in bits as 64-bit little-endian
   for (let i = 0; i < 4; i++) bytes.push((bitLen >>> (i * 8)) & 0xff);
-  for (let i = 0; i < 4; i++) bytes.push(0); // high 32 bits (0 for short strings)
+  for (let i = 0; i < 4; i++) bytes.push(0);
 
-  // Helper functions
   const add = (a: number, b: number) => (a + b) | 0;
   const rotl = (x: number, n: number) => (x << n) | (x >>> (32 - n));
 
@@ -56,7 +56,6 @@ function md5(input: string): string {
 
     let a = a0, b = b0, c = c0, d = d0;
 
-    // Round 1
     a=ff(a,b,c,d,w[0],7,0xd76aa478);   d=ff(d,a,b,c,w[1],12,0xe8c7b756);
     c=ff(c,d,a,b,w[2],17,0x242070db);   b=ff(b,c,d,a,w[3],22,0xc1bdceee);
     a=ff(a,b,c,d,w[4],7,0xf57c0faf);   d=ff(d,a,b,c,w[5],12,0x4787c62a);
@@ -66,7 +65,6 @@ function md5(input: string): string {
     a=ff(a,b,c,d,w[12],7,0x6b901122);  d=ff(d,a,b,c,w[13],12,0xfd987193);
     c=ff(c,d,a,b,w[14],17,0xa679438e);  b=ff(b,c,d,a,w[15],22,0x49b40821);
 
-    // Round 2
     a=gg(a,b,c,d,w[1],5,0xf61e2562);   d=gg(d,a,b,c,w[6],9,0xc040b340);
     c=gg(c,d,a,b,w[11],14,0x265e5a51);  b=gg(b,c,d,a,w[0],20,0xe9b6c7aa);
     a=gg(a,b,c,d,w[5],5,0xd62f105d);   d=gg(d,a,b,c,w[10],9,0x02441453);
@@ -76,7 +74,6 @@ function md5(input: string): string {
     a=gg(a,b,c,d,w[13],5,0xa9e3e905);  d=gg(d,a,b,c,w[2],9,0xfcefa3f8);
     c=gg(c,d,a,b,w[7],14,0x676f02d9);   b=gg(b,c,d,a,w[12],20,0x8d2a4c8a);
 
-    // Round 3
     a=hh(a,b,c,d,w[5],4,0xfffa3942);   d=hh(d,a,b,c,w[8],11,0x8771f681);
     c=hh(c,d,a,b,w[11],16,0x6d9d6122);  b=hh(b,c,d,a,w[14],23,0xfde5380c);
     a=hh(a,b,c,d,w[1],4,0xa4beea44);   d=hh(d,a,b,c,w[4],11,0x4bdecfa9);
@@ -86,7 +83,6 @@ function md5(input: string): string {
     a=hh(a,b,c,d,w[9],4,0xd9d4d039);   d=hh(d,a,b,c,w[12],11,0xe6db99e5);
     c=hh(c,d,a,b,w[15],16,0x1fa27cf8);  b=hh(b,c,d,a,w[2],23,0xc4ac5665);
 
-    // Round 4
     a=ii(a,b,c,d,w[0],6,0xf4292244);   d=ii(d,a,b,c,w[7],10,0x432aff97);
     c=ii(c,d,a,b,w[14],15,0xab9423a7);  b=ii(b,c,d,a,w[5],21,0xfc93a039);
     a=ii(a,b,c,d,w[12],6,0x655b59c3);  d=ii(d,a,b,c,w[3],10,0x8f0ccc92);
@@ -109,9 +105,9 @@ function md5(input: string): string {
 
 // ── Sign ──
 
-function sign(key: string, account = '', password = ''): string {
+function sign(key: string, arg1 = '', arg2 = ''): string {
   const seed = SIGN_SEEDS[key];
-  const raw = typeof seed === 'function' ? seed(account, password) : seed;
+  const raw = typeof seed === 'function' ? seed(arg1, arg2) : seed;
   return md5(raw);
 }
 
@@ -121,8 +117,7 @@ interface RequestOptions {
   params?: Record<string, string | number>;
   body?: any;
   token?: string;
-  account?: string;
-  password?: string;
+  signArgs?: [string, string];  // Extra args for sign function
 }
 
 export async function apiRequest(
@@ -142,22 +137,20 @@ export async function apiRequest(
     url += '?' + qs.toString();
   }
 
+  const [arg1, arg2] = opts.signArgs || ['', ''];
+
   const headers: Record<string, string> = {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'lang': 'zh-cn',
     'v': '7.0.3',
-    'p': '1',
+    'p': '3',  // Admin backend
     't': String(Math.floor(Date.now() / 1000)),
-    'sign': sign(signKey, opts.account || '', opts.password || ''),
+    'sign': sign(signKey, arg1, arg2),
     'authcode': opts.token ? `HH ${opts.token}` : 'HH ',
   };
 
-  const fetchOpts: RequestInit = {
-    method,
-    headers,
-  };
-
+  const fetchOpts: RequestInit = { method, headers };
   if (opts.body) {
     fetchOpts.body = JSON.stringify(opts.body);
   }
@@ -168,75 +161,51 @@ export async function apiRequest(
     try {
       return JSON.parse(text) as ApiResponse;
     } catch {
-      return { code: resp.status, message: `Non-JSON response (${resp.status}): ${text.substring(0, 200)}` };
+      return { code: resp.status, message: `Non-JSON (${resp.status}): ${text.substring(0, 200)}` };
     }
   } catch (e: any) {
     return { code: -1, message: e.message || 'Network error' };
   }
 }
 
-// ── Token Management ──
+// ── Token Management via refresh_token ──
 
-const TOKEN_KV_KEY = 'apm_admin_token';
+const TOKEN_KV_KEY = 'apm_access_token';
 
-async function tryLogin(
-  env: Env,
-  signKey: string,
-  endpoints: string[]
-): Promise<string | null> {
-  const account = env.APM_ACCOUNT;
-  const password = env.APM_PASSWORD;
-  const pwdMd5 = md5(password);
+async function refreshAccessToken(env: Env): Promise<string | null> {
+  const refreshToken = env.APM_REFRESH_TOKEN;
+  if (!refreshToken) return null;
 
-  for (const path of endpoints) {
-    const resp = await apiRequest(env, 'POST', path, signKey, {
-      body: { account, password: pwdMd5 },
-      account,
-      password,
-    });
+  const resp = await apiRequest(env, 'POST', '/ids/refresh_token', 'refresh_token', {
+    body: { refresh_token: refreshToken },
+    signArgs: [refreshToken, ''],
+  });
 
-    const token = resp.result?.token || (resp as any).token;
-    if (token) return token;
-  }
-  return null;
-}
-
-async function doLogin(env: Env): Promise<string | null> {
-  // Try admin login
-  const adminPaths = [
-    '/mem/admin/m_loginbyadmin',
-    '/mem/admin/m_login',
-    '/mem/admin/login',
-  ];
-  let token = await tryLogin(env, 'admin_login', adminPaths);
-
-  // Fallback to user login
-  if (!token) {
-    const userPaths = [
-      '/mem/app/m_login',
-      '/mem/app/login',
-      '/mem/app/m_userlogin',
-    ];
-    token = await tryLogin(env, 'login', userPaths);
+  if (resp.code !== 100) {
+    console.log('refresh_token failed:', resp.message);
+    return null;
   }
 
-  if (!token) return null;
+  const accessToken = resp.result?.access_token;
+  const expireAt = resp.result?.access_token_expire_at;
 
-  // Cache to KV (23 hours TTL)
+  if (!accessToken) return null;
+
+  // Cache to KV
   const cache: TokenCache = {
-    token,
-    expire: Date.now() + 23 * 3600 * 1000,
+    token: accessToken,
+    expire: expireAt ? expireAt * 1000 : Date.now() + 12 * 3600 * 1000,
   };
 
   try {
     await env.TOKEN_CACHE.put(TOKEN_KV_KEY, JSON.stringify(cache), {
-      expirationTtl: 23 * 3600,
+      expirationTtl: 12 * 3600,  // 12 hours
     });
   } catch {
     // KV write failure is non-fatal
   }
 
-  return token;
+  return accessToken;
 }
 
 export async function getToken(env: Env): Promise<string> {
@@ -245,7 +214,9 @@ export async function getToken(env: Env): Promise<string> {
     const cached = await env.TOKEN_CACHE.get(TOKEN_KV_KEY);
     if (cached) {
       const data: TokenCache = JSON.parse(cached);
-      if (Date.now() < data.expire - 60000) {
+      // Check if token expires in more than 5 minutes
+      const expireMs = data.expire > 1e12 ? data.expire : data.expire * 1000;
+      if (Date.now() < expireMs - 5 * 60 * 1000) {
         return data.token;
       }
     }
@@ -253,15 +224,9 @@ export async function getToken(env: Env): Promise<string> {
     // Cache miss
   }
 
-  // Auto-login
-  const token = await doLogin(env);
+  // Refresh access_token
+  const token = await refreshAccessToken(env);
   if (token) return token;
 
-  // Fallback: use pre-configured token
-  if (env.APM_TOKEN) {
-    console.log('Using pre-configured APM_TOKEN as fallback');
-    return env.APM_TOKEN;
-  }
-
-  throw new Error('Login failed and no APM_TOKEN configured');
+  throw new Error('Failed to refresh access_token. Check APM_REFRESH_TOKEN.');
 }

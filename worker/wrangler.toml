@@ -5,7 +5,7 @@ compatibility_date = "2024-06-01"
 [vars]
 APM_API_BASE = "https://44k2t5n59e.execute-api.ap-northeast-2.amazonaws.com"
 
-# APM_ACCOUNT and APM_PASSWORD are set via Cloudflare Dashboard (Secrets)
+# APM_REFRESH_TOKEN is set via Cloudflare Dashboard (Secrets)
 # Do NOT put credentials here
 
 [[kv_namespaces]]
